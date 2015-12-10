@@ -241,7 +241,7 @@ inline bool Signature::operator==(Signature const &other) const {
 }
 
 inline bool Signature::operator!=(Signature const &other) const {
-    return not operator==(other);
+    return !operator==(other);
 }
 
 inline bool Signature::operator<(Signature const &other) const {

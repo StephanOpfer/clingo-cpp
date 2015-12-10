@@ -172,6 +172,9 @@ private:
 };
 
 template <class T>
+typename FlyweightVec<T>::FromOffset FlyweightVec<T>::fromOffset;
+
+template <class T>
 struct FlyweightVec<T>::Hash {
     size_t operator()(key_type key) const;
 };

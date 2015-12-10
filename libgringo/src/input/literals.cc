@@ -332,26 +332,28 @@ inline void CSPLiteral::replace(Defines &x) {
 // {{{1 definition of Literal::toGround
 
 inline Ground::ULit PredicateLiteral::toGround(PredDomMap &x) const {
-    return make_unique<Ground::PredicateLiteral>(add(x, repr->getSig()), naf, get_clone(repr));
+    return gringo_make_unique<Ground::PredicateLiteral>(add(x, repr->getSig()), naf, get_clone(repr));
 }
 inline Ground::ULit ProjectionLiteral::toGround(PredDomMap &x) const {
-    return make_unique<Ground::ProjectionLiteral>(add(x, repr->getSig()), get_clone(repr));
+    bool initialized = initialized_;
+    initialized_ = true;
+    return gringo_make_unique<Ground::ProjectionLiteral>(add(x, repr->getSig()), get_clone(repr), initialized);
 }
 inline Ground::ULit RelationLiteral::toGround(PredDomMap &) const {
-    return make_unique<Ground::RelationLiteral>(rel, get_clone(left), get_clone(right));
+    return gringo_make_unique<Ground::RelationLiteral>(rel, get_clone(left), get_clone(right));
 }
 inline Ground::ULit RangeLiteral::toGround(PredDomMap &) const {
-    return make_unique<Ground::RangeLiteral>(get_clone(assign), get_clone(lower), get_clone(upper));
+    return gringo_make_unique<Ground::RangeLiteral>(get_clone(assign), get_clone(lower), get_clone(upper));
 }
 inline Ground::ULit FalseLiteral::toGround(PredDomMap &) const {
     throw std::runtime_error("FalseLiteral::toGround: must not happen");
 }
 inline Ground::ULit ScriptLiteral::toGround(PredDomMap &) const {
-    return make_unique<Ground::ScriptLiteral>(get_clone(assign), name, get_clone(args));
+    return gringo_make_unique<Ground::ScriptLiteral>(get_clone(assign), name, get_clone(args));
 }
 inline Ground::ULit CSPLiteral::toGround(PredDomMap &) const {
     assert(terms.size() == 2);
-    return make_unique<Ground::CSPLiteral>(terms[1].rel, get_clone(terms[0].term), get_clone(terms[1].term));
+    return gringo_make_unique<Ground::CSPLiteral>(terms[1].rel, get_clone(terms[0].term), get_clone(terms[1].term));
 }
 
 // {{{1 definition of Literal::shift
@@ -415,7 +417,7 @@ PredicateLiteral::~PredicateLiteral() { }
 // {{{1 definition of ProjectionLiteral
 
 ProjectionLiteral::ProjectionLiteral(UTerm &&repr)
-    : PredicateLiteral(NAF::POS, std::move(repr)) { }
+    : PredicateLiteral(NAF::POS, std::move(repr)), initialized_(false) { }
 
 ProjectionLiteral::~ProjectionLiteral() { }
 

@@ -180,28 +180,28 @@ inline UIdx make_binder(AbstractDomain<Element> &domain, NAF naf, Term const &re
             idxClone->bind(empty);
             if (occBound.empty()) { 
                 auto &idx(domain.add(std::move(idxClone), imported));
-                return make_unique<FullPredicateBinder>(std::move(predClone), elem, idx, type);
+                return gringo_make_unique<FullPredicateBinder>(std::move(predClone), elem, idx, type);
             }
             else {
                 assert(imported == 0);
                 auto &idx(domain.add(std::move(idxBound), std::move(idxClone)));
-                return make_unique<PosPredicateBinder>(std::move(predClone), elem, idx, type, std::move(predBound));
+                return gringo_make_unique<PosPredicateBinder>(std::move(predClone), elem, idx, type, std::move(predBound));
             }
         }
         else if (recursive) {
             assert(imported == 0);
             Term::VarSet empty;
             predClone->bind(empty);
-            return make_unique<PosPredicateMatcher>(elem, domain, std::move(predClone), type);
+            return gringo_make_unique<PosPredicateMatcher>(elem, domain, std::move(predClone), type);
         }
         else { 
             assert(imported == 0);
-            return make_unique<PredicateMatcher>(elem, domain, repr, RECNAF::POS); 
+            return gringo_make_unique<PredicateMatcher>(elem, domain, repr, RECNAF::POS); 
         }
     }
     else { 
         assert(imported == 0);
-        return make_unique<PredicateMatcher>(elem, domain, repr, recnaf(naf, recursive));
+        return gringo_make_unique<PredicateMatcher>(elem, domain, repr, recnaf(naf, recursive));
     }
 }
 

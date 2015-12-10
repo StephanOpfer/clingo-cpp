@@ -33,10 +33,10 @@
 
 namespace Gringo {
  
-// {{{ declaration of make_unique<T, Args>
+// {{{ declaration of gringo_make_unique<T, Args>
 
 template<typename T, typename ...Args>
-std::unique_ptr<T> make_unique(Args&& ...args);
+std::unique_ptr<T> gringo_make_unique(Args&& ...args);
 
 // }}}
 // {{{ declaration of helpers to perform comparisons
@@ -176,10 +176,10 @@ void cross_product(std::vector<std::vector<T>> &vec);
 
 // }}}
 
-// {{{ definition of make_unique
+// {{{ definition of gringo_make_unique
 
 template<typename T, typename ...Args>
-std::unique_ptr<T> make_unique(Args&& ...args) {
+std::unique_ptr<T> gringo_make_unique(Args&& ...args) {
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 

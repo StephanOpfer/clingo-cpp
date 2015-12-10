@@ -73,7 +73,7 @@ std::pair<Program, Defines> parse(std::string const &str) {
     Scripts scripts(Gringo::Test::getTestModule());
     NongroundProgramBuilder pb{ scripts, ret.first, out, ret.second };
     NonGroundParser ngp{ pb };
-    ngp.pushStream("-", make_unique<std::stringstream>(str));
+    ngp.pushStream("-", gringo_make_unique<std::stringstream>(str));
     ngp.parse();
     return ret;
 }
@@ -87,7 +87,7 @@ std::string rewrite(std::pair<Program, Defines> &&x) {
     replace_all(str, ":-#inc_base.", ".");
     replace_all(str, ":-#inc_base,", ":-");
     replace_all(str, ":-#inc_base;", ":-");
-    return std::move(str);
+    return str;
 }
 
 bool check(std::pair<Program, Defines> &&x) {
@@ -102,7 +102,7 @@ bool check(std::pair<Program, Defines> &&x) {
 
 void TestProgram::setUp() {
     oldPrinter = std::move(message_printer());
-    message_printer() = make_unique<TestMessagePrinter>(messages);
+    message_printer() = gringo_make_unique<TestMessagePrinter>(messages);
 }
 
 void TestProgram::tearDown() {

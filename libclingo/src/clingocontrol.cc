@@ -137,8 +137,8 @@ void ClingoControl::parse(const StringSeq& files, const ClingoOptions& opts, Cla
         else          { lpOut.reset(new Output::PlainLparseOutputter(std::cout)); }
         out.reset(new Output::OutputBase(std::move(outPreds), *lpOut, opts.lparseDebug));
     }
-    pb = make_unique<Input::NongroundProgramBuilder>(scripts, prg, *out, defs, opts.rewriteMinimize);
-    parser = make_unique<Input::NonGroundParser>(*pb);
+    pb = gringo_make_unique<Input::NongroundProgramBuilder>(scripts, prg, *out, defs, opts.rewriteMinimize);
+    parser = gringo_make_unique<Input::NonGroundParser>(*pb);
     for (auto &x : opts.defines) {
         LOG << "define: " << x << std::endl;
         parser->parseDefine(x);
@@ -288,7 +288,7 @@ Gringo::SolveIter *ClingoControl::solveIter(Assumptions &&ass) {
 #if WITH_THREADS
     prepare_(nullptr, nullptr);
     clasp->assume(toClaspAssumptions(std::move(ass)));
-    solveIter_ = Gringo::make_unique<ClingoSolveIter>(clasp->startSolveAsync(), static_cast<Clasp::Asp::LogicProgram&>(*clasp->program()), *out, clasp->ctx);
+    solveIter_ = Gringo::gringo_make_unique<ClingoSolveIter>(clasp->startSolveAsync(), static_cast<Clasp::Asp::LogicProgram&>(*clasp->program()), *out, clasp->ctx);
     return solveIter_.get();
 #else
     (void)ass;
@@ -300,7 +300,7 @@ Gringo::SolveFuture *ClingoControl::solveAsync(ModelHandler mh, FinishHandler fh
 #if WITH_THREADS
     prepare_(mh, fh);
     clasp->assume(toClaspAssumptions(std::move(ass)));
-    solveFuture_ = Gringo::make_unique<ClingoSolveFuture>(clasp->solveAsync(nullptr));
+    solveFuture_ = Gringo::gringo_make_unique<ClingoSolveFuture>(clasp->solveAsync(nullptr));
     return solveFuture_.get();
 #else
     (void)mh;
@@ -443,13 +443,13 @@ struct ClingoDomainElement : Gringo::DomainProxy::Element {
             assert(elemIt != domIt->second.exports.end());
             ++elemIt;
             if (elemIt != domIt->second.exports.end()) {
-                return Gringo::make_unique<ClingoDomainElement>(out, prg, domIt, elemIt, advanceDom);
+                return Gringo::gringo_make_unique<ClingoDomainElement>(out, prg, domIt, elemIt, advanceDom);
             }
             if (advanceDom) {
                 for (++domIt; domIt != domIe; ++domIt) {
                     if (!skipDomain(domIt->first) && !domIt->second.exports.exports.empty()) {
                         elemIt = domIt->second.exports.begin();
-                        return Gringo::make_unique<ClingoDomainElement>(out, prg, domIt, elemIt, advanceDom);
+                        return Gringo::gringo_make_unique<ClingoDomainElement>(out, prg, domIt, elemIt, advanceDom);
                     }
                 }
             }
@@ -483,7 +483,7 @@ Gringo::DomainProxy::ElementPtr ClingoControl::iter(Gringo::Signature const &sig
     if (it != out->domains.end()) {
         auto jt = it->second.exports.begin();
         if (jt != it->second.exports.end()) {
-            return Gringo::make_unique<ClingoDomainElement>(*out, static_cast<Clasp::Asp::LogicProgram&>(*clasp->program()), it, jt, false);
+            return Gringo::gringo_make_unique<ClingoDomainElement>(*out, static_cast<Clasp::Asp::LogicProgram&>(*clasp->program()), it, jt, false);
         }
     }
     return nullptr;
@@ -492,7 +492,7 @@ Gringo::DomainProxy::ElementPtr ClingoControl::iter(Gringo::Signature const &sig
 Gringo::DomainProxy::ElementPtr ClingoControl::iter() const {
     for (auto it = out->domains.begin(), ie = out->domains.end(); it != ie; ++it) {
         if (!skipDomain(it->first) && !it->second.exports.exports.empty()) {
-            return Gringo::make_unique<ClingoDomainElement>(*out, static_cast<Clasp::Asp::LogicProgram&>(*clasp->program()), it, it->second.exports.begin());
+            return Gringo::gringo_make_unique<ClingoDomainElement>(*out, static_cast<Clasp::Asp::LogicProgram&>(*clasp->program()), it, it->second.exports.begin());
         }
     }
     return nullptr;
@@ -505,7 +505,7 @@ Gringo::DomainProxy::ElementPtr ClingoControl::lookup(Gringo::Value const &atom)
             auto jt = it->second.domain.find(atom);
             if (jt != it->second.domain.end()) {
                 auto kt = it->second.exports.begin() + jt->second.generation();
-                return Gringo::make_unique<ClingoDomainElement>(*out, static_cast<Clasp::Asp::LogicProgram&>(*clasp->program()), it, kt);
+                return Gringo::gringo_make_unique<ClingoDomainElement>(*out, static_cast<Clasp::Asp::LogicProgram&>(*clasp->program()), it, kt);
             }
         }
     }

@@ -40,7 +40,7 @@ inline std::unique_ptr<VarTerm> var(char const *x, int level = 0) {
     Location loc(FWString("dummy"), 1, 1, FWString("dummy"), 1, 1);
     auto var(make_locatable<VarTerm>(loc, FWString(x), ret));
     var->level = level;
-    return std::move(var);
+    return var;
 }
 
 inline std::unique_ptr<LinearTerm> lin(char const *x, int m, int n) {

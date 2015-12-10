@@ -76,7 +76,7 @@ inline Models solve(std::function<bool(OutputBase &, Scripts &, Input::Program&,
     Scripts scripts(Gringo::Test::getTestModule());
     Input::NongroundProgramBuilder pb(scripts, prg, out, defs);
     Input::NonGroundParser parser(pb);
-    parser.pushStream("-", make_unique<std::stringstream>(std::move(str)));
+    parser.pushStream("-", gringo_make_unique<std::stringstream>(std::move(str)));
     Models models;
     // grounder: parse
     parser.parse();
@@ -97,7 +97,7 @@ inline Models solve(std::function<bool(OutputBase &, Scripts &, Input::Program&,
         libclasp.solve(&printer);
     }
     std::sort(models.begin(), models.end());
-    return std::move(models);
+    return models;
 }
 
 inline Models solve(std::string &&str, std::initializer_list<std::string> filter = {""}, std::initializer_list<Clasp::wsum_t> minimize = {}) {

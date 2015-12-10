@@ -142,7 +142,7 @@ UStmVec Statement::unpool(bool beforeRewrite) {
             [] (UBodyAggr &x) -> UBodyAggrVec {
                 UBodyAggrVec body;
                 x->unpool(body, true);
-                return std::move(body);
+                return body;
             }, [&bodies](UBodyAggrVec &&x) { bodies.push_back(std::move(x)); });
     }
     else {
@@ -180,8 +180,8 @@ bool Statement::rewrite1(Projections &project) {
     for (auto &y : body) { 
         if (!y->simplify(project, state, singleton)) { return false; }
     }
-    for (auto &y : state.dots) { body.emplace_back(make_unique<SimpleBodyLiteral>(RangeLiteral::make(y))); }
-    for (auto &y : state.scripts) { body.emplace_back(make_unique<SimpleBodyLiteral>(ScriptLiteral::make(y))); }
+    for (auto &y : state.dots) { body.emplace_back(gringo_make_unique<SimpleBodyLiteral>(RangeLiteral::make(y))); }
+    for (auto &y : state.scripts) { body.emplace_back(gringo_make_unique<SimpleBodyLiteral>(ScriptLiteral::make(y))); }
     return true;
 }
 
@@ -300,8 +300,8 @@ void Statement::rewrite2() {
         arith.emplace_back();
         head->rewriteArithmetics(arith, auxGen);
         for (auto &y : body) { y->rewriteArithmetics(arith, assign, auxGen); }
-        for (auto &y : arith.back()) { body.emplace_back(make_unique<SimpleBodyLiteral>(RelationLiteral::make(y))); }
-        for (auto &y : assign) { body.emplace_back(make_unique<SimpleBodyLiteral>(RelationLiteral::make(y))); }
+        for (auto &y : arith.back()) { body.emplace_back(gringo_make_unique<SimpleBodyLiteral>(RelationLiteral::make(y))); }
+        for (auto &y : assign) { body.emplace_back(gringo_make_unique<SimpleBodyLiteral>(RelationLiteral::make(y))); }
         arith.pop_back();
     }
     _rewriteAssignments(body);
@@ -355,7 +355,7 @@ void Statement::toGround(ToGroundArg &x, Ground::UStmVec &stms) const {
     Ground::RuleType t = Ground::RuleType::NORMAL;
     switch (type) {
         case StatementType::WEAKCONSTRAINT: {
-            CreateHead hd{[this](Ground::ULitVec &&lits) -> Ground::UStm { return make_unique<Ground::WeakConstraint>(wc_args_from_term(wc_term_from_head(head)), std::move(lits)); }};
+            CreateHead hd{[this](Ground::ULitVec &&lits) -> Ground::UStm { return gringo_make_unique<Ground::WeakConstraint>(wc_args_from_term(wc_term_from_head(head)), std::move(lits)); }};
             Gringo::Input::toGround(std::move(hd), body, x, stms);
             return;
         }

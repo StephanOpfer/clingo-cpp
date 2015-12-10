@@ -2293,7 +2293,7 @@ def on_finish(res, canceled):
 
 def main(prg):
     prg.ground([("base", [])])
-    f = prg.solve_async(on_model, on_finish)
+    f = prg.solve_async(None, on_model, on_finish)
     f.wait()
 
 #end.
@@ -2903,7 +2903,7 @@ Python::Python(GringoModule &module) {
     ControlWrap::module = &module;
 }
 bool Python::exec(Location const &loc, FWString code) {
-    if (!impl) { impl = make_unique<PythonImpl>(); }
+    if (!impl) { impl = gringo_make_unique<PythonImpl>(); }
     if (!impl->exec(loc, code)) {
         handleError(loc, "parsing failed");
         return false;
@@ -2911,7 +2911,7 @@ bool Python::exec(Location const &loc, FWString code) {
     return true;
 }
 bool Python::callable(Any const &context, FWString name) {
-    if (Py_IsInitialized() && !impl) { impl = make_unique<PythonImpl>(); }
+    if (Py_IsInitialized() && !impl) { impl = gringo_make_unique<PythonImpl>(); }
     PyObject * const *pyContext = context.get<PyObject*>();
     return impl && impl->callable(pyContext ? *pyContext : nullptr, name);
 }

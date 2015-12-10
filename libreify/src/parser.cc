@@ -18,6 +18,7 @@
 
 // }}}
 
+#include "gringo/bug.hh"
 #include "reify/parser.hh"
 #include "reify/program.hh"
 #include "reify/util.hh"

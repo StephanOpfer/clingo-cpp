@@ -202,7 +202,7 @@ Conjunction *Conjunction::clone() const {
     return make_locatable<Conjunction>(loc(), get_clone(elems)).release();
 }
 SimpleBodyLiteral *SimpleBodyLiteral::clone() const { 
-    return make_unique<SimpleBodyLiteral>(get_clone(lit)).release();
+    return gringo_make_unique<SimpleBodyLiteral>(get_clone(lit)).release();
 }
 TupleHeadAggregate *TupleHeadAggregate::clone() const {
     return make_locatable<TupleHeadAggregate>(loc(), fun, translated, get_clone(bounds), get_clone(elems)).release();
@@ -214,7 +214,7 @@ Disjunction *Disjunction::clone() const {
     return make_locatable<Disjunction>(loc(), get_clone(elems)).release();
 }
 SimpleHeadLiteral *SimpleHeadLiteral::clone() const { 
-    return make_unique<SimpleHeadLiteral>(get_clone(lit)).release();
+    return gringo_make_unique<SimpleHeadLiteral>(get_clone(lit)).release();
 }
 DisjointAggregate *DisjointAggregate::clone() const { 
     return make_locatable<DisjointAggregate>(loc(), naf, get_clone(elems)).release();
@@ -303,7 +303,7 @@ void Conjunction::unpool(UBodyAggrVec &x, bool beforeRewrite) {
 }
 
 void SimpleBodyLiteral::unpool(UBodyAggrVec &x, bool beforeRewrite) { 
-    for (auto &y : lit->unpool(beforeRewrite)) { x.emplace_back(make_unique<SimpleBodyLiteral>(std::move(y))); }
+    for (auto &y : lit->unpool(beforeRewrite)) { x.emplace_back(gringo_make_unique<SimpleBodyLiteral>(std::move(y))); }
 }
 
 void TupleHeadAggregate::unpool(UHeadAggrVec &x, bool beforeRewrite) {
@@ -384,7 +384,7 @@ void Disjunction::unpool(UHeadAggrVec &x, bool beforeRewrite) {
     x.emplace_back(make_locatable<Disjunction>(loc(), std::move(e)));
 }
 void SimpleHeadLiteral::unpool(UHeadAggrVec &x, bool beforeRewrite) { 
-    for (auto &y : lit->unpool(beforeRewrite)) { x.emplace_back(make_unique<SimpleHeadLiteral>(std::move(y))); }
+    for (auto &y : lit->unpool(beforeRewrite)) { x.emplace_back(gringo_make_unique<SimpleHeadLiteral>(std::move(y))); }
 }
 void DisjointAggregate::unpool(UBodyAggrVec &x, bool beforeRewrite) { 
     CSPElemVec e;
@@ -565,8 +565,8 @@ UHeadAggr Disjunction::rewriteAggregates(UBodyAggrVec &) {
 UHeadAggr SimpleHeadLiteral::rewriteAggregates(UBodyAggrVec &aggr) { 
     ULit shifted(lit->shift(true));
     if (shifted) { 
-        aggr.emplace_back(make_unique<SimpleBodyLiteral>(std::move(shifted)));
-        return make_unique<SimpleHeadLiteral>(make_locatable<FalseLiteral>(lit->loc()));
+        aggr.emplace_back(gringo_make_unique<SimpleBodyLiteral>(std::move(shifted)));
+        return gringo_make_unique<SimpleHeadLiteral>(make_locatable<FalseLiteral>(lit->loc()));
     }
     return nullptr;
 }
@@ -1295,7 +1295,7 @@ void DisjointAggregate::replace(Defines &x) {
 
 CreateBody TupleBodyAggregate::toGround(ToGroundArg &x, Ground::UStmVec &stms) const {
     if (!isAssignment()) {
-        stms.emplace_back(make_unique<Ground::BodyAggregateComplete>(x.newId(*this), fun, get_clone(bounds)));
+        stms.emplace_back(gringo_make_unique<Ground::BodyAggregateComplete>(x.newId(*this), fun, get_clone(bounds)));
         auto &completeRef = static_cast<Ground::BodyAggregateComplete&>(*stms.back());
         CreateStmVec split;
         split.emplace_back([&completeRef, this](Ground::ULitVec &&auxLits) -> Ground::UStm {
@@ -1308,8 +1308,8 @@ CreateBody TupleBodyAggregate::toGround(ToGroundArg &x, Ground::UStmVec &stms) c
                 case AggregateFunction::MAX: { neutral = make_locatable<ValTerm>(loc(), Value::createInf());  break; }
                 default:                     { neutral = make_locatable<ValTerm>(loc(), Value::createNum(0)); break; }
             }
-            for (auto &y : bounds) { auxLits.emplace_back(make_unique<Ground::RelationLiteral>(y.rel, get_clone(neutral), get_clone(y.bound))); }
-            auto ret = make_unique<Ground::BodyAggregateAccumulate>(completeRef, get_clone(tuple), Ground::ULitVec(), std::move(auxLits));
+            for (auto &y : bounds) { auxLits.emplace_back(gringo_make_unique<Ground::RelationLiteral>(y.rel, get_clone(neutral), get_clone(y.bound))); }
+            auto ret = gringo_make_unique<Ground::BodyAggregateAccumulate>(completeRef, get_clone(tuple), Ground::ULitVec(), std::move(auxLits));
             completeRef.accuDoms.emplace_back(*ret);
             return std::move(ret);
         });
@@ -1317,13 +1317,13 @@ CreateBody TupleBodyAggregate::toGround(ToGroundArg &x, Ground::UStmVec &stms) c
             split.emplace_back([this,&completeRef,&y,&x](Ground::ULitVec &&auxLits) -> Ground::UStm {
                 Ground::ULitVec lits;
                 for (auto &z : y.second) { lits.emplace_back(z->toGround(x.domains)); }
-                auto ret = make_unique<Ground::BodyAggregateAccumulate>(completeRef, get_clone(y.first), std::move(lits), std::move(auxLits));
+                auto ret = gringo_make_unique<Ground::BodyAggregateAccumulate>(completeRef, get_clone(y.first), std::move(lits), std::move(auxLits));
                 completeRef.accuDoms.emplace_back(*ret);
                 return std::move(ret);
             });
         }
         return CreateBody([&completeRef, this](Ground::ULitVec &lits, bool primary) {
-            if (primary) { lits.emplace_back(make_unique<Ground::BodyAggregateLiteral>(completeRef, naf)); }
+            if (primary) { lits.emplace_back(gringo_make_unique<Ground::BodyAggregateLiteral>(completeRef, naf)); }
         }, std::move(split));
     }
     else {
@@ -1339,7 +1339,7 @@ CreateBody TupleBodyAggregate::toGround(ToGroundArg &x, Ground::UStmVec &stms) c
         UTerm repr(x.newId(std::move(global), loc(), false));
         UTerm dataRepr(x.newId(std::move(globalSpecial), loc()));
         
-        stms.emplace_back(make_unique<Ground::AssignmentAggregateComplete>(get_clone(repr), get_clone(dataRepr), fun));
+        stms.emplace_back(gringo_make_unique<Ground::AssignmentAggregateComplete>(get_clone(repr), get_clone(dataRepr), fun));
         auto &completeRef = static_cast<Ground::AssignmentAggregateComplete&>(*stms.back());
         // NOTE: for assignment aggregates this does not make much sense
         //       the empty aggregate always matches and hence the elements 
@@ -1348,7 +1348,7 @@ CreateBody TupleBodyAggregate::toGround(ToGroundArg &x, Ground::UStmVec &stms) c
         split.emplace_back([&completeRef, this](Ground::ULitVec &&auxLits) -> Ground::UStm {
             UTermVec tuple;
             tuple.emplace_back(make_locatable<ValTerm>(loc(), Value()));
-            auto ret = make_unique<Ground::AssignmentAggregateAccumulate>(completeRef, get_clone(tuple), Ground::ULitVec(), std::move(auxLits));
+            auto ret = gringo_make_unique<Ground::AssignmentAggregateAccumulate>(completeRef, get_clone(tuple), Ground::ULitVec(), std::move(auxLits));
             completeRef.accuDoms.emplace_back(*ret);
             return std::move(ret);
         });
@@ -1356,13 +1356,13 @@ CreateBody TupleBodyAggregate::toGround(ToGroundArg &x, Ground::UStmVec &stms) c
             split.emplace_back([this,&completeRef,&y,&x](Ground::ULitVec &&auxLits) -> Ground::UStm {
                 Ground::ULitVec lits;
                 for (auto &z : y.second) { lits.emplace_back(z->toGround(x.domains)); }
-                auto ret = make_unique<Ground::AssignmentAggregateAccumulate>(completeRef, get_clone(y.first), std::move(lits), std::move(auxLits));
+                auto ret = gringo_make_unique<Ground::AssignmentAggregateAccumulate>(completeRef, get_clone(y.first), std::move(lits), std::move(auxLits));
                 completeRef.accuDoms.emplace_back(*ret);
                 return std::move(ret);
             });
         }
         return CreateBody([&completeRef, this](Ground::ULitVec &lits, bool primary) {
-            if (primary) { lits.emplace_back(make_unique<Ground::AssignmentAggregateLiteral>(completeRef)); }
+            if (primary) { lits.emplace_back(gringo_make_unique<Ground::AssignmentAggregateLiteral>(completeRef)); }
         }, std::move(split));
     }
 }
@@ -1390,29 +1390,29 @@ CreateBody Conjunction::toGround(ToGroundArg &x, Ground::UStmVec &stms) const {
             local.emplace_back(occ.first->clone());
         }
     }
-    stms.emplace_back(make_unique<Ground::ConjunctionComplete>(x.newId(*this), std::move(local)));
+    stms.emplace_back(gringo_make_unique<Ground::ConjunctionComplete>(x.newId(*this), std::move(local)));
     auto &completeRef = static_cast<Ground::ConjunctionComplete&>(*stms.back());
 
     Ground::ULitVec condLits;
     for (auto &y : elems.front().second) { condLits.emplace_back(y->toGround(x.domains)); }
-    stms.emplace_back(make_unique<Ground::ConjunctionAccumulateCond>(completeRef, std::move(condLits)));
+    stms.emplace_back(gringo_make_unique<Ground::ConjunctionAccumulateCond>(completeRef, std::move(condLits)));
 
     for (auto &y : elems.front().first)  { 
         Ground::ULitVec headLits;    
         for (auto &z : y) {
             headLits.emplace_back(z->toGround(x.domains)); 
         }
-        stms.emplace_back(make_unique<Ground::ConjunctionAccumulateHead>(completeRef, std::move(headLits)));
+        stms.emplace_back(gringo_make_unique<Ground::ConjunctionAccumulateHead>(completeRef, std::move(headLits)));
     }
 
     CreateStmVec split;
     split.emplace_back([&completeRef](Ground::ULitVec &&auxLits) -> Ground::UStm {
-        auto ret = make_unique<Ground::ConjunctionAccumulateEmpty>(completeRef, std::move(auxLits));
+        auto ret = gringo_make_unique<Ground::ConjunctionAccumulateEmpty>(completeRef, std::move(auxLits));
         return std::move(ret);
     });
 
     return CreateBody([&completeRef](Ground::ULitVec &lits, bool primary) {
-        if (primary) { lits.emplace_back(make_unique<Ground::ConjunctionLiteral>(completeRef)); }
+        if (primary) { lits.emplace_back(gringo_make_unique<Ground::ConjunctionLiteral>(completeRef)); }
     }, std::move(split));
 }
 CreateBody SimpleBodyLiteral::toGround(ToGroundArg &x, Ground::UStmVec &) const {
@@ -1421,11 +1421,11 @@ CreateBody SimpleBodyLiteral::toGround(ToGroundArg &x, Ground::UStmVec &) const 
     }, CreateStmVec()};
 }
 CreateBody DisjointAggregate::toGround(ToGroundArg &x, Ground::UStmVec &stms) const {
-    stms.emplace_back(make_unique<Ground::DisjointComplete>(x.newId(*this)));
+    stms.emplace_back(gringo_make_unique<Ground::DisjointComplete>(x.newId(*this)));
     auto &completeRef = static_cast<Ground::DisjointComplete&>(*stms.back());
     CreateStmVec split;
     split.emplace_back([&completeRef, this](Ground::ULitVec &&auxLits) -> Ground::UStm {
-        auto ret = make_unique<Ground::DisjointAccumulate>(completeRef, Ground::ULitVec(), std::move(auxLits));
+        auto ret = gringo_make_unique<Ground::DisjointAccumulate>(completeRef, Ground::ULitVec(), std::move(auxLits));
         completeRef.accuDoms.emplace_back(*ret);
         return std::move(ret);
     });
@@ -1433,28 +1433,28 @@ CreateBody DisjointAggregate::toGround(ToGroundArg &x, Ground::UStmVec &stms) co
         split.emplace_back([this,&completeRef,&y,&x](Ground::ULitVec &&auxLits) -> Ground::UStm {
             Ground::ULitVec lits;
             for (auto &z : y.cond) { lits.emplace_back(z->toGround(x.domains)); }
-            auto ret = make_unique<Ground::DisjointAccumulate>(completeRef, get_clone(y.tuple), get_clone(y.value), std::move(lits), std::move(auxLits));
+            auto ret = gringo_make_unique<Ground::DisjointAccumulate>(completeRef, get_clone(y.tuple), get_clone(y.value), std::move(lits), std::move(auxLits));
             completeRef.accuDoms.emplace_back(*ret);
             return std::move(ret);
         });
     }
     return CreateBody([&completeRef, this](Ground::ULitVec &lits, bool primary) {
-        if (primary) { lits.emplace_back(make_unique<Ground::DisjointLiteral>(completeRef, naf)); }
+        if (primary) { lits.emplace_back(gringo_make_unique<Ground::DisjointLiteral>(completeRef, naf)); }
     }, std::move(split));
 }
 CreateHead TupleHeadAggregate::toGround(ToGroundArg &x, Ground::UStmVec &stms, Ground::RuleType) const {
     auto rule = std::make_shared<std::unique_ptr<Ground::HeadAggregateRule>>(nullptr);
-    *rule = make_unique<Ground::HeadAggregateRule>(x.newId(*this), fun, get_clone(bounds), Ground::ULitVec{});
-    stms.emplace_back(make_unique<Ground::HeadAggregateComplete>(**rule));
+    *rule = gringo_make_unique<Ground::HeadAggregateRule>(x.newId(*this), fun, get_clone(bounds), Ground::ULitVec{});
+    stms.emplace_back(gringo_make_unique<Ground::HeadAggregateComplete>(**rule));
     auto &completeRef = static_cast<Ground::HeadAggregateComplete&>(*stms.back());
     unsigned elemIndex = 0;
     for (auto &y : elems) {
         Ground::ULitVec lits;
         for (auto &z : std::get<2>(y)) { lits.emplace_back(z->toGround(x.domains)); }
-        lits.emplace_back(make_unique<Ground::HeadAggregateLiteral>(**rule));
+        lits.emplace_back(gringo_make_unique<Ground::HeadAggregateLiteral>(**rule));
         UTerm headRep(std::get<1>(y)->headRepr());
         PredicateDomain *pred = headRep ? &add(x.domains, headRep->getSig()) : nullptr;
-        auto ret = make_unique<Ground::HeadAggregateAccumulate>(**rule, elemIndex, get_clone(std::get<0>(y)), pred, std::move(headRep), std::move(lits));
+        auto ret = gringo_make_unique<Ground::HeadAggregateAccumulate>(**rule, elemIndex, get_clone(std::get<0>(y)), pred, std::move(headRep), std::move(lits));
         completeRef.accuDoms.emplace_back(*ret);
         stms.emplace_back(std::move(ret));
         elemIndex++;
@@ -1465,7 +1465,7 @@ CreateHead LitHeadAggregate::toGround(ToGroundArg &, Ground::UStmVec &, Ground::
     throw std::runtime_error("Aggregate::rewriteAggregates must be called before LitAggregate::toGround");
 }
 CreateHead Disjunction::toGround(ToGroundArg &x, Ground::UStmVec &stms, Ground::RuleType) const {
-    stms.emplace_back(make_unique<Ground::DisjunctionComplete>(x.newId(*this)));
+    stms.emplace_back(gringo_make_unique<Ground::DisjunctionComplete>(x.newId(*this)));
     auto &complete = static_cast<Ground::DisjunctionComplete&>(*stms.back());
 
     unsigned elemIndex = 0;
@@ -1495,7 +1495,7 @@ CreateHead Disjunction::toGround(ToGroundArg &x, Ground::UStmVec &stms, Ground::
         }
         complete.appendLocal(std::move(local));
 
-        stms.emplace_back(make_unique<Ground::DisjunctionAccumulateCond>(complete, elemIndex, std::move(body)));
+        stms.emplace_back(gringo_make_unique<Ground::DisjunctionAccumulateCond>(complete, elemIndex, std::move(body)));
         for (auto &head : y.first) {
             VarTermBoundVec varsHead;
             head.first->collect(varsHead, false);
@@ -1512,27 +1512,27 @@ CreateHead Disjunction::toGround(ToGroundArg &x, Ground::UStmVec &stms, Ground::
             if (headRepr) {
                 PredicateDomain &headDom = add(x.domains, headRepr->getSig());
                 complete.appendHead(headDom, std::move(headRepr));
-                stms.emplace_back(make_unique<Ground::DisjunctionAccumulateHead>(complete, elemIndex, headIndex, std::move(expand)));
+                stms.emplace_back(gringo_make_unique<Ground::DisjunctionAccumulateHead>(complete, elemIndex, headIndex, std::move(expand)));
                 ++headIndex;
             }
             else {
-                stms.emplace_back(make_unique<Ground::DisjunctionAccumulateHead>(complete, elemIndex, -1, std::move(expand)));
+                stms.emplace_back(gringo_make_unique<Ground::DisjunctionAccumulateHead>(complete, elemIndex, -1, std::move(expand)));
             }
         }
         ++elemIndex;
     }
     
-    return CreateHead([&](Ground::ULitVec &&lits) { return make_unique<Ground::DisjunctionRule>(complete, std::move(lits)); });
+    return CreateHead([&](Ground::ULitVec &&lits) { return gringo_make_unique<Ground::DisjunctionRule>(complete, std::move(lits)); });
 }
 CreateHead SimpleHeadLiteral::toGround(ToGroundArg &x, Ground::UStmVec &, Ground::RuleType type) const {
     return
         {[this, &x, type](Ground::ULitVec &&lits) -> Ground::UStm {
             if (UTerm headRepr = lit->headRepr()) {
                 FWSignature sig(headRepr->getSig());
-                return make_unique<Ground::Rule>(&add(x.domains, sig), std::move(headRepr), std::move(lits), type);
+                return gringo_make_unique<Ground::Rule>(&add(x.domains, sig), std::move(headRepr), std::move(lits), type);
             }
             else {
-                return make_unique<Ground::Rule>(nullptr, nullptr, std::move(lits), type);
+                return gringo_make_unique<Ground::Rule>(nullptr, nullptr, std::move(lits), type);
             }
         }};
 }

@@ -1501,7 +1501,7 @@ Lua::Lua(GringoModule &module) {
 }
 
 bool Lua::exec(Location const &loc, FWString code) {
-    if (!impl) { impl = make_unique<LuaImpl>(); }
+    if (!impl) { impl = gringo_make_unique<LuaImpl>(); }
     LuaClear lc(impl->L);
     std::stringstream oss;
     oss << loc;

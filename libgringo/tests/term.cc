@@ -135,7 +135,7 @@ std::vector<std::tuple<UTerm, SimplifyState::DotsMap, Term::ArithmeticsMap>> rew
         Term::replace(term, term->rewriteArithmetics(arith, elemState.gen));
         res.emplace_back(std::move(term), std::move(elemState.dots), std::move(arith));
     }
-    return std::move(res);
+    return res;
 }
 
 UTerm bindVars(UTerm &&x) {
@@ -156,7 +156,7 @@ UTerm bindVars(UTerm &&x) {
 
 void TestTerm::setUp() {
     oldPrinter = std::move(message_printer());
-    message_printer() = make_unique<TestMessagePrinter>(messages);
+    message_printer() = gringo_make_unique<TestMessagePrinter>(messages);
 }
 
 void TestTerm::tearDown() {

@@ -24,7 +24,7 @@ from os.path import join, exists
 
 if not exists("build"): mkdir("build")
 
-AddOption('--build-dir', default='debug', metavar='DIR', nargs=1, type='string', dest='build_dir')
+AddOption('--build-dir', default='release', metavar='DIR', nargs=1, type='string', dest='build_dir')
 AddOption('--test-case', default=None, metavar='NAME', nargs=1, type='string', dest='test_case')
 
 # Note: workaround for scons limitation (try to get a hand on the internal option parser)
@@ -78,7 +78,7 @@ elif GetOption("build_dir") == "release":
     env['CPPDEFINES']['NDEBUG'] = 1
 elif GetOption("build_dir") == "js":
     env['CXXFLAGS']   = ['-std=c++11', '-Os', '-Wall', '-s', 'DISABLE_EXCEPTION_CATCHING=0']
-    env['LINKFLAGS']  = ['-std=c++11', '-Os', '-s', 'EXPORTED_FUNCTIONS=\'["_run"]\'']
+    env['LINKFLAGS']  = ['-std=c++11', '-Os', '-s', 'DISABLE_EXCEPTION_CATCHING=0', '-s', 'EXPORTED_FUNCTIONS=\'["_run"]\'']
     env['CXX'] = "em++"
     env['AR'] = 'emar'
     env['RANLIB'] = 'emranlib'
@@ -100,6 +100,9 @@ Options:
   --build-dir=DIR             Sets the build directory to build/DIR. If DIR is
                               release or static then options are set,
                               respectively. Otherwise, debug options are set.
+                              Furthermore the special build dir js sets options
+                              to build with emscripten. Afterwards, target web
+                              can be used to build clingo for the web browser.
                               Default: debug
   --test-case=NAME            Selects which test case to run. If empty all
                               tests will be executed.
@@ -117,6 +120,7 @@ Targets:
   libclingo                   Build shared clingo library.
   example                     Build example app using libclingo.
   tags                        Generate ctags file.
+  web                         Build clingo for the web (use with build-dir js).
 
 Variables:
 """ + opts.GenerateHelpText(env))

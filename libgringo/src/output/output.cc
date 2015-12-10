@@ -403,7 +403,7 @@ struct DefaultLparseTranslator : LparseTranslator {
     void translateMinimize();
 
     ULit makeAux(NAF naf = NAF::POS) {
-        return make_unique<AuxLiteral>(std::make_shared<AuxAtom>(auxAtom()), naf);
+        return gringo_make_unique<AuxLiteral>(std::make_shared<AuxAtom>(auxAtom()), naf);
     }
 
     ULit getTrueLit() {
@@ -493,8 +493,8 @@ bool Bound::init(DefaultLparseTranslator &x) {
                 auto assign = [&](SAuxAtom a, SAuxAtom b) {
                     if (b) {
                         LRC rule(true);
-                        if (a) { rule.addBody(make_unique<AuxLiteral>(a, NAF::POS)); }
-                        rule.addHead(make_unique<AuxLiteral>(b, NAF::POS)).toLparse(x);
+                        if (a) { rule.addBody(gringo_make_unique<AuxLiteral>(a, NAF::POS)); }
+                        rule.addHead(gringo_make_unique<AuxLiteral>(b, NAF::POS)).toLparse(x);
                     }
                 };
                 for (auto y : _range) { 
@@ -509,12 +509,12 @@ bool Bound::init(DefaultLparseTranslator &x) {
                 int l = _range.front(), r = _range.back();
                 for (auto jt = atoms.begin() + 1; jt != atoms.end(); ++jt) {
                     int w = (jt - 1)->first;
-                    if (w < l)                           { LRC().addBody(make_unique<AuxLiteral>(jt->second, NAF::POS)).toLparse(x); }
+                    if (w < l)                           { LRC().addBody(gringo_make_unique<AuxLiteral>(jt->second, NAF::POS)).toLparse(x); }
                     else if (w >= r)                     { 
-                        LRC().addBody(make_unique<AuxLiteral>(jt->second, NAF::NOT)).toLparse(x);
+                        LRC().addBody(gringo_make_unique<AuxLiteral>(jt->second, NAF::NOT)).toLparse(x);
                         if (w == r) { next.emplace_back(*(jt - 1)); }
                     }
-                    else if (!_range.contains(w, w + 1)) { LRC().addBody(make_unique<AuxLiteral>((jt-1)->second, NAF::NOT)).addBody(make_unique<AuxLiteral>(jt->second, NAF::POS)).toLparse(x); }
+                    else if (!_range.contains(w, w + 1)) { LRC().addBody(gringo_make_unique<AuxLiteral>((jt-1)->second, NAF::NOT)).addBody(gringo_make_unique<AuxLiteral>(jt->second, NAF::POS)).toLparse(x); }
                     else                                 { next.emplace_back(*(jt - 1)); }
                 }
                 if (atoms.back().first <= r) { next.emplace_back(atoms.back()); }
@@ -539,8 +539,8 @@ void LinearConstraint::Generate::generate(StateVec::iterator it, int current, in
             for (auto &x : states) {
                 if (x.atom != x.bound.atoms.end() && x.atom->second) { 
                     LRC()
-                        .addHead(make_unique<AuxLiteral>(aux.back(), NAF::POS))
-                        .addBody(make_unique<AuxLiteral>(x.atom->second, x.coef < 0 ? NAF::NOT : NAF::POS))
+                        .addHead(gringo_make_unique<AuxLiteral>(aux.back(), NAF::POS))
+                        .addBody(gringo_make_unique<AuxLiteral>(x.atom->second, x.coef < 0 ? NAF::NOT : NAF::POS))
                         .toLparse(trans);
                 }
             }
@@ -568,8 +568,8 @@ bool LinearConstraint::Generate::init() {
     if (current <= getBound()) {
         generate(states.begin(), current, remainder); 
         ULitVec body;
-        for (auto &x : aux) { body.emplace_back(make_unique<AuxLiteral>(x, NAF::POS)); }
-        LRC().addHead(make_unique<AuxLiteral>(cons.atom, NAF::POS)).addBody(std::move(body)).toLparse(trans);
+        for (auto &x : aux) { body.emplace_back(gringo_make_unique<AuxLiteral>(x, NAF::POS)); }
+        LRC().addHead(gringo_make_unique<AuxLiteral>(cons.atom, NAF::POS)).addBody(std::move(body)).toLparse(trans);
     }
     return current <= cons.bound;
 }
@@ -595,9 +595,9 @@ bool DisjointConstraint::encode(DefaultLparseTranslator &x) {
                 auto &aux = current[i*coef + fixed];
                 if (!aux) { aux = std::make_shared<AuxAtom>(x.auxAtom()); }
                 ULitVec lits = get_clone(cond);
-                if ((it-1)->second)          { lits.emplace_back(make_unique<AuxLiteral>((it-1)->second, NAF::NOT)); }
-                if (it != bound.atoms.end()) { lits.emplace_back(make_unique<AuxLiteral>(it->second, NAF::POS)); }
-                LRC().addHead(make_unique<AuxLiteral>(aux, NAF::POS)).addBody(std::move(lits)).toLparse(x);
+                if ((it-1)->second)          { lits.emplace_back(gringo_make_unique<AuxLiteral>((it-1)->second, NAF::NOT)); }
+                if (it != bound.atoms.end()) { lits.emplace_back(gringo_make_unique<AuxLiteral>(it->second, NAF::POS)); }
+                LRC().addHead(gringo_make_unique<AuxLiteral>(aux, NAF::POS)).addBody(std::move(lits)).toLparse(x);
                 values.insert(i*coef + fixed);
                 ++it;
             }
@@ -607,7 +607,7 @@ bool DisjointConstraint::encode(DefaultLparseTranslator &x) {
                 case 0: {
                     auto &aux = current[condVal.fixed];
                     if (!aux) { aux = std::make_shared<AuxAtom>(x.auxAtom()); }
-                    LRC().addHead(make_unique<AuxLiteral>(aux, NAF::POS)).addBody(std::move(condVal.lits)).toLparse(x);
+                    LRC().addHead(gringo_make_unique<AuxLiteral>(aux, NAF::POS)).addBody(std::move(condVal.lits)).toLparse(x);
                     values.insert(condVal.fixed);
                     break;
                 }
@@ -642,7 +642,7 @@ bool DisjointConstraint::encode(DefaultLparseTranslator &x) {
                     x.addLinearConstraint(aux, get_clone(condVal.value), -condVal.fixed-1);
                     for (auto &add : condVal.value) { add.first *= -1; }
                     x.addLinearConstraint(aux, get_clone(condVal.value), condVal.fixed-1);
-                    LRC().addBody(make_unique<AuxLiteral>(aux, NAF::POS)).toLparse(x);
+                    LRC().addBody(gringo_make_unique<AuxLiteral>(aux, NAF::POS)).toLparse(x);
                     // then proceed as in case one
                     encodeSingle(condVal.lits, 1, b.var, 0);
                     break;
@@ -656,14 +656,14 @@ bool DisjointConstraint::encode(DefaultLparseTranslator &x) {
         for (auto &layer : layers) {
             auto it = layer.find(value);
             if (it != layer.end()) {
-                card.emplace_back(make_unique<AuxLiteral>(it->second, NAF::POS), 1);
+                card.emplace_back(gringo_make_unique<AuxLiteral>(it->second, NAF::POS), 1);
             }
         }
         SAuxAtom aux = std::make_shared<AuxAtom>(x.auxAtom());
-        checks.emplace_back(make_unique<AuxLiteral>(aux, NAF::NOT));
+        checks.emplace_back(gringo_make_unique<AuxLiteral>(aux, NAF::NOT));
         x.printer(WeightRule(aux, 2, std::move(card)));
     }
-    LRC().addHead(make_unique<AuxLiteral>(atom, NAF::POS)).addBody(std::move(checks)).toLparse(x);
+    LRC().addHead(gringo_make_unique<AuxLiteral>(atom, NAF::POS)).addBody(std::move(checks)).toLparse(x);
     return true;
 }
 
@@ -854,7 +854,7 @@ OutputBase::OutputBase(OutputPredicates &&outPreds, std::ostream &out, bool lpar
     : handler(lparse ? UStmHandler(new LparsePlainHandler(domains, out)) : UStmHandler(new PlainHandler(out))) 
     , outPreds(std::move(outPreds)) { }
 OutputBase::OutputBase(OutputPredicates &&outPreds, LparseOutputter &out, LparseDebug debug) 
-    : handler(make_unique<LparseHandler>(domains, out, debug))
+    : handler(gringo_make_unique<LparseHandler>(domains, out, debug))
     , outPreds(std::move(outPreds)) { }
 void OutputBase::output(Value const &val) {
     auto it(domains.find(val.sig()));

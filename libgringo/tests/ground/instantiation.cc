@@ -123,7 +123,7 @@ std::string TestInstantiation::ground(std::string const &str, std::initializer_l
     Scripts scripts(Gringo::Test::getTestModule());
     Input::NongroundProgramBuilder pb{ scripts, prg, out, defs };
     Input::NonGroundParser ngp{ pb };
-    ngp.pushStream("-", make_unique<std::stringstream>(str));
+    ngp.pushStream("-", gringo_make_unique<std::stringstream>(str));
     ngp.parse();
     prg.rewrite(defs);
 //    std::cerr << prg << std::endl;

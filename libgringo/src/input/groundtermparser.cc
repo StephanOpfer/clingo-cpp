@@ -27,7 +27,7 @@ GroundTermParser::GroundTermParser() { }
 Value GroundTermParser::parse(std::string const &str) {
     undefined_ = false;
     while (!empty()) { pop(); }
-    push(make_unique<std::stringstream>(str), 0);
+    push(gringo_make_unique<std::stringstream>(str), 0);
     GroundTermGrammar::parser parser(this);
     parser.parse();
     return undefined_ ? Value() : value;

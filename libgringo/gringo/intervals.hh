@@ -214,9 +214,9 @@ private:
     using interval_vec = std::vector<Interval>;
 
 public:
-    class const_iterator : public std::iterator<std::bidirectional_iterator_tag, value_type const, int> { 
+    class const_iterator : public std::iterator<std::bidirectional_iterator_tag, value_type, int> { 
         friend class enum_interval_set;
-        using iterator = std::iterator<std::bidirectional_iterator_tag, value_type const, int>;
+        using iterator = std::iterator<std::bidirectional_iterator_tag, value_type, int>;
     public:
         const_iterator() = default;
         const_iterator(const_iterator const &x) = default;
@@ -267,7 +267,6 @@ public:
         value_type current;
         typename interval_vec::const_iterator rng;
         interval_vec const                   *set;
-
     };
     
     enum_interval_set()                           = default;

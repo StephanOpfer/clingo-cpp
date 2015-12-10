@@ -481,7 +481,7 @@ void BodyAggregateComplete::startLinearize(bool active) {
     if (active) { inst = Instantiator(*this); }
 }
 void BodyAggregateComplete::linearize(Scripts &, bool) {
-    auto binder  = make_unique<BindOnce>();
+    auto binder  = gringo_make_unique<BindOnce>();
     for (HeadOccurrence &x : defBy) { x.defines(*binder->getUpdater(), &inst); }
     inst.add(std::move(binder), Instantiator::DependVec{});
     inst.finalize(Instantiator::DependVec{});
@@ -686,7 +686,7 @@ void AssignmentAggregateComplete::startLinearize(bool active) {
 }
 
 void AssignmentAggregateComplete::linearize(Scripts &, bool) {
-    auto binder  = make_unique<BindOnce>();
+    auto binder  = gringo_make_unique<BindOnce>();
     for (HeadOccurrence &x : defBy) { x.defines(*binder->getUpdater(), &inst); }
     inst.add(std::move(binder), Instantiator::DependVec{});
     inst.finalize(Instantiator::DependVec{});
@@ -993,7 +993,7 @@ void ConjunctionAccumulateEmpty::report(Output::OutputBase &) {
 ConjunctionAccumulateCond::ConjunctionAccumulateCond(ConjunctionComplete &complete, ULitVec &&lits) 
 : AbstractStatement(complete.condRepr(), &complete.domCond, std::move(lits), {})
 , complete(complete) {
-    auxLits.emplace_back(make_unique<PredicateLiteral>(complete.domEmpty, NAF::POS, complete.emptyRepr()));
+    auxLits.emplace_back(gringo_make_unique<PredicateLiteral>(complete.domEmpty, NAF::POS, complete.emptyRepr()));
 }
 
 ConjunctionAccumulateCond::~ConjunctionAccumulateCond() = default;
@@ -1043,7 +1043,7 @@ void ConjunctionAccumulateCond::report(Output::OutputBase &) {
 ConjunctionAccumulateHead::ConjunctionAccumulateHead(ConjunctionComplete &complete, ULitVec &&lits) 
 : AbstractStatement(complete.headRepr(), nullptr, std::move(lits), {})
 , complete(complete) {
-    auxLits.emplace_back(make_unique<PredicateLiteral>(complete.domCond, NAF::POS, complete.condRepr()));
+    auxLits.emplace_back(gringo_make_unique<PredicateLiteral>(complete.domCond, NAF::POS, complete.condRepr()));
 }
 
 ConjunctionAccumulateHead::~ConjunctionAccumulateHead() = default;
@@ -1130,7 +1130,7 @@ void ConjunctionComplete::startLinearize(bool active){
 }
 
 void ConjunctionComplete::linearize(Scripts &, bool){
-    auto binder  = make_unique<BindOnce>();
+    auto binder  = gringo_make_unique<BindOnce>();
     for (HeadOccurrence &x : defBy) { x.defines(*binder->getUpdater(), &inst); }
     inst.add(std::move(binder), Instantiator::DependVec{});
     inst.finalize(Instantiator::DependVec{});
@@ -1235,7 +1235,7 @@ void DisjointComplete::startLinearize(bool active) {
     if (active) { inst = Instantiator(*this); }
 }
 void DisjointComplete::linearize(Scripts &, bool) {
-    auto binder  = make_unique<BindOnce>();
+    auto binder  = gringo_make_unique<BindOnce>();
     for (HeadOccurrence &x : defBy) { x.defines(*binder->getUpdater(), &inst); }
     inst.add(std::move(binder), Instantiator::DependVec{});
     inst.finalize(Instantiator::DependVec{});
@@ -1398,7 +1398,7 @@ HeadAggregateRule::HeadAggregateRule(UTerm &&repr, AggregateFunction fun, BoundV
 HeadAggregateRule::~HeadAggregateRule() { }
 
 void HeadAggregateRule::report(Output::OutputBase &out) {
-    std::unique_ptr<Output::HeadAggregateRule> rule(make_unique<Output::HeadAggregateRule>());
+    std::unique_ptr<Output::HeadAggregateRule> rule(gringo_make_unique<Output::HeadAggregateRule>());
     rule->fun = fun;
     for (auto &x : lits) {
         if (auto lit = x->toOutput()) { rule->body.emplace_back(Output::ULit(lit->clone())); }
@@ -1442,7 +1442,7 @@ void HeadAggregateRule::print(std::ostream &out) const {
 
 HeadAggregateAccumulate::HeadAggregateAccumulate(HeadAggregateRule &headRule, unsigned elemIndex, UTermVec &&tuple, PredicateDomain *predDom, UTerm &&predRepr, ULitVec &&lits)
     : AbstractStatement(completeRepr_(headRule.def.repr), nullptr, std::move(lits), {})
-    , predDef(predRepr ? make_unique<HeadDefinition>(std::move(predRepr), predDom) : nullptr)
+    , predDef(predRepr ? gringo_make_unique<HeadDefinition>(std::move(predRepr), predDom) : nullptr)
     , headRule(headRule)
     , elemIndex(elemIndex)
     , tuple(std::move(tuple)) { }
@@ -1510,7 +1510,7 @@ void HeadAggregateComplete::startLinearize(bool active) {
     if (active) { inst = Instantiator(*this); }
 }
 void HeadAggregateComplete::linearize(Scripts &, bool) { 
-    auto binder  = make_unique<BindOnce>();
+    auto binder  = gringo_make_unique<BindOnce>();
     for (HeadOccurrence &x : defBy) { x.defines(*binder->getUpdater(), &inst); }
     inst.add(std::move(binder), Instantiator::DependVec{});
     inst.finalize(Instantiator::DependVec{});
@@ -1630,7 +1630,7 @@ void DisjunctionRule::report(Output::OutputBase &out) {
     complete.domEmpty.insert(def.repr->eval(undefined), false);
     assert(!undefined);
 
-    std::unique_ptr<Output::DisjunctionRule> rule(make_unique<Output::DisjunctionRule>());
+    std::unique_ptr<Output::DisjunctionRule> rule(gringo_make_unique<Output::DisjunctionRule>());
     for (auto &x : lits) {
         if (auto lit = x->toOutput()) { rule->body.emplace_back(Output::ULit(lit->clone())); }
     }
@@ -1643,7 +1643,7 @@ void DisjunctionRule::report(Output::OutputBase &out) {
 DisjunctionAccumulateCond::DisjunctionAccumulateCond(DisjunctionComplete &complete, unsigned elemIndex, ULitVec &&lits)
 : AbstractStatement(complete.condRepr(elemIndex), &complete.domCond, std::move(lits), {})
 , complete(complete) {
-    auxLits.emplace_back(make_unique<PredicateLiteral>(complete.domEmpty, NAF::POS, complete.emptyRepr()));
+    auxLits.emplace_back(gringo_make_unique<PredicateLiteral>(complete.domEmpty, NAF::POS, complete.emptyRepr()));
 }
 
 DisjunctionAccumulateCond::~DisjunctionAccumulateCond() = default;
@@ -1680,7 +1680,7 @@ DisjunctionAccumulateHead::DisjunctionAccumulateHead(DisjunctionComplete &comple
 : AbstractStatement(complete.headRepr(elemIndex, headIndex), nullptr, std::move(lits), {})
 , complete(complete)
 , headIndex(headIndex) {
-    auxLits.emplace_back(make_unique<PredicateLiteral>(complete.domCond, NAF::POS, complete.condRepr(elemIndex)));
+    auxLits.emplace_back(gringo_make_unique<PredicateLiteral>(complete.domCond, NAF::POS, complete.condRepr(elemIndex)));
 }
 
 DisjunctionAccumulateHead::~DisjunctionAccumulateHead() = default;
@@ -1786,7 +1786,7 @@ void DisjunctionComplete::startLinearize(bool active) {
 }
 
 void DisjunctionComplete::linearize(Scripts &, bool) {
-    auto binder  = make_unique<BindOnce>();
+    auto binder  = gringo_make_unique<BindOnce>();
     for (HeadOccurrence &x : defBy) { x.defines(*binder->getUpdater(), &inst); }
     inst.add(std::move(binder), Instantiator::DependVec{});
     inst.finalize(Instantiator::DependVec{});
@@ -1825,7 +1825,7 @@ void DisjunctionComplete::report(Output::OutputBase &) {
             Output::ULitVec &head = std::get<3>(todo);
             if (headIndex >= 0) {
                 auto h = static_cast<PredicateDomain*>(heads[headIndex].domain)->insert(std::get<2>(todo), false);
-                head.emplace_back(make_unique<Output::PredicateLiteral>(NAF::POS, *std::get<0>(h)));
+                head.emplace_back(gringo_make_unique<Output::PredicateLiteral>(NAF::POS, *std::get<0>(h)));
             }
             if (head.empty()) { 
                 // NOTE: the head is a conjunction of disjunctions

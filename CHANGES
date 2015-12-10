@@ -1,3 +1,7 @@
+gringo/clingo 4.5.3
+  * fixed regression w.r.t gringo 4.4 in translation of conditional literals
+  * fixed projection in incremental programs
+  * fixed bug with (double) negative literals in minimize constraints
 gringo/clingo 4.5.2
   * fixed memory leak in python API when enumerating models
   * updated to clasp version 3.1.3

@@ -59,6 +59,7 @@ struct ProjectionLiteral : PredicateLiteral {
     virtual Ground::ULit toGround(PredDomMap &x) const;
     virtual ULit shift(bool negate);
     virtual ~ProjectionLiteral();
+    mutable bool initialized_;
 };
 
 // }}}

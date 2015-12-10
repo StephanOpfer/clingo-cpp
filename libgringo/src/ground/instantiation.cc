@@ -70,7 +70,7 @@ void Instantiator::add(UIdx &&index, DependVec &&depends) {
     binders.emplace_back(std::move(index), std::move(depends));
 }
 void Instantiator::finalize(DependVec &&depends) {
-    binders.emplace_back(make_unique<SolutionBinder>(), std::move(depends));
+    binders.emplace_back(gringo_make_unique<SolutionBinder>(), std::move(depends));
 }
 void Instantiator::enqueue(Queue &queue) { queue.enqueue(*this); }
 void Instantiator::instantiate(Output::OutputBase &out) {

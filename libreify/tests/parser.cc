@@ -31,7 +31,7 @@ namespace {
 std::string toLparse(std::string const &s) {
     Program prg;
     Parser p(prg);
-    p.parse("<input>", make_unique<std::istringstream>(s));
+    p.parse("<input>", gringo_make_unique<std::istringstream>(s));
     std::ostringstream oss;
     prg.printLparse(oss);
     return oss.str();

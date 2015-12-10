@@ -128,9 +128,10 @@ struct PredicateLiteral : Literal, BodyOcc {
 };
 
 struct ProjectionLiteral : PredicateLiteral {
-    ProjectionLiteral(PredicateDomain &dom, UTerm &&repr);
+    ProjectionLiteral(PredicateDomain &dom, UTerm &&repr, bool initialized);
     virtual UIdx index(Scripts &scripts, BinderType type, Term::VarSet &bound);
     virtual ~ProjectionLiteral();
+    bool initialized_;
 };
 
 // }}}

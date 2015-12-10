@@ -75,6 +75,31 @@ void TestLua::test_parse() {
         );
     CPPUNIT_ASSERT_EQUAL(S("[p(3)]"), to_string(lua.call(Any(), loc, "get", {})));
 }
+
+namespace {
+
+std::string removeTrace(std::string &&s) {
+    auto needle = "stack traceback:\n";
+    auto begin = s.find(needle);
+    if (begin != std::string::npos) {
+        begin+= strlen(needle);
+        auto end = begin;
+        while (end < s.size() && s[end] == ' ') {
+            auto next = s.find("\n", end);
+            if (next == std::string::npos) {
+                break;
+            }
+            else {
+                end = next + 1;
+            }
+        }
+        s.replace(begin, end - begin, "  ...\n");
+    }
+    return std::move(s);
+}
+
+} // namespace
+
 void TestLua::test_values() {
     Location loc("dummy", 1, 1, "dummy", 1, 1);
     Lua lua(Gringo::Test::getTestModule());
@@ -102,13 +127,13 @@ void TestLua::test_values() {
     {
         Gringo::Test::Messages msg;
         CPPUNIT_ASSERT_EQUAL(S("[]"), to_string(lua.call(Any(), loc, "none", {})));
-        CPPUNIT_ASSERT_EQUAL(S(
+    CPPUNIT_ASSERT_EQUAL(S(
             "["
             "dummy:1:1: info: operation undefined:\n"
             "  RuntimeError: cannot convert to value\n"
             "stack traceback:\n"
-            "  [C]: in ?\n"
-            "]"), replace_all(IO::to_string(msg), "[C]: ?", "[C]: in ?"));
+            "  ...\n"
+            "]"), removeTrace(IO::to_string(msg)));
     }
     {
         Gringo::Test::Messages msg;
@@ -118,10 +143,8 @@ void TestLua::test_values() {
             "dummy:1:1: info: operation undefined:\n"
             "  RuntimeError: [string \"dummy:1:1\"]:4: cannot convert to value\n"
             "stack traceback:\n"
-            "  [C]: in function 'Fun'\n"
-            "  [string \"dummy:1:1\"]:4: in function <[string \"dummy:1:1\"]:4>\n"
-            "  [C]: in ?\n"
-            "]"), replace_all(IO::to_string(msg), "[C]: ?", "[C]: in ?"));
+            "  ...\n"
+            "]"), removeTrace(IO::to_string(msg)));
     }
     {
         Gringo::Test::Messages msg;

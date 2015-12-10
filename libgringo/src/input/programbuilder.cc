@@ -248,7 +248,7 @@ BoundVecUid NongroundProgramBuilder::boundvec() {
 }
 
 BoundVecUid NongroundProgramBuilder::boundvec(BoundVecUid uid, Relation rel, TermUid term) {
-    bounds_[uid].emplace_back(rel, std::move(terms_.erase(term)));
+    bounds_[uid].emplace_back(rel, terms_.erase(term));
     return uid;
 }
 
@@ -260,7 +260,7 @@ BdLitVecUid NongroundProgramBuilder::body() {
 }
 
 BdLitVecUid NongroundProgramBuilder::bodylit(BdLitVecUid body, LitUid bodylit) {
-    bodies_[body].push_back(make_unique<SimpleBodyLiteral>(lits_.erase(bodylit)));
+    bodies_[body].push_back(gringo_make_unique<SimpleBodyLiteral>(lits_.erase(bodylit)));
     return body;
 }
 
@@ -289,7 +289,7 @@ BdLitVecUid NongroundProgramBuilder::disjoint(BdLitVecUid body, Location const &
 // {{{ rule heads
 
 HdLitUid NongroundProgramBuilder::headlit(LitUid lit) {
-    return heads_.insert(make_unique<SimpleHeadLiteral>(lits_.erase(lit)));
+    return heads_.insert(gringo_make_unique<SimpleHeadLiteral>(lits_.erase(lit)));
 }
 
 HdLitUid NongroundProgramBuilder::headaggr(Location const &loc, AggregateFunction fun, BoundVecUid bounds, HdAggrElemVecUid headaggrelemvec) {

@@ -159,7 +159,7 @@ void ClingoApp::run(Clasp::ClaspFacade& clasp) {
         grOpts_.verbose = verbose() == UINT_MAX;
         Asp::LogicProgram* lp = mode_ != mode_gringo ? static_cast<Asp::LogicProgram*>(prg) : 0;
         DefaultGringoModule module;
-        grd = Gringo::make_unique<ClingoControl>(module, mode_ == mode_clingo, clasp_.get(), claspConfig_, std::bind(&ClingoApp::handlePostGroundOptions, this, _1), std::bind(&ClingoApp::handlePreSolveOptions, this, _1));
+        grd = Gringo::gringo_make_unique<ClingoControl>(module, mode_ == mode_clingo, clasp_.get(), claspConfig_, std::bind(&ClingoApp::handlePostGroundOptions, this, _1), std::bind(&ClingoApp::handlePreSolveOptions, this, _1));
         grd->parse(claspAppOpts_.input, grOpts_, lp);
         grd->main();
     }

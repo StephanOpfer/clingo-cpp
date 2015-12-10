@@ -65,7 +65,7 @@ Program parse(std::string const &str) {
     Scripts scripts(Gringo::Test::getTestModule());
     Input::NongroundProgramBuilder pb{ scripts, prg, out, defs };
     Input::NonGroundParser ngp{ pb };
-    ngp.pushStream("-", make_unique<std::stringstream>(str));
+    ngp.pushStream("-", gringo_make_unique<std::stringstream>(str));
     ngp.parse();
     prg.rewrite(defs);
     return prg.toGround(out.domains);

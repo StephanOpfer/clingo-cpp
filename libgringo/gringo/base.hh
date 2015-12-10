@@ -200,7 +200,7 @@ inline BoundVec Bound::unpool() {
     BoundVec pool;
     auto f = [&](UTerm &&x) { pool.emplace_back(rel, std::move(x)); };
     Term::unpool(bound, Gringo::unpool, f);
-    return std::move(pool);
+    return pool;
 }
 
 inline bool Bound::simplify(SimplifyState &state) {

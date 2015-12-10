@@ -196,7 +196,7 @@ void NonGroundParser::pushStream(std::string &&file, std::unique_ptr<std::istrea
 }
 
 void NonGroundParser::pushBlock(std::string const &name, IdVec const &vec, std::string const &block) {
-    LexerState::push(make_unique<std::istringstream>(block), {"<block>", {name, vec}});
+    LexerState::push(gringo_make_unique<std::istringstream>(block), {"<block>", {name, vec}});
 }
 
 void NonGroundParser::_init() {
@@ -235,7 +235,7 @@ void NonGroundParser::include(unsigned sUid, Location const &loc, bool inbuilt) 
                 report_included(loc, "<incmode>");
             }
             else {
-                push("<incmode>", make_unique<std::istringstream>(R"(
+                push("<incmode>", gringo_make_unique<std::istringstream>(R"(
 #script (lua) 
 
 function get(val, default)
@@ -296,7 +296,7 @@ end
 }
 
 bool NonGroundParser::parseDefine(std::string const &define) {
-    pushStream("<" + define + ">", make_unique<std::stringstream>(define));
+    pushStream("<" + define + ">", gringo_make_unique<std::stringstream>(define));
     _startSymbol = NonGroundGrammar::parser::token::PARSE_DEF;
     NonGroundGrammar::parser parser(this);
     auto ret = parser.parse();

@@ -747,7 +747,7 @@ UTerm PoolTerm::renameVars(RenameMap &names) const {
     return make_locatable<PoolTerm>(loc(), std::move(args));
 }
 
-UGTerm PoolTerm::gterm(RenameMap &names, ReferenceMap &refs) const   { return make_unique<GVarTerm>(_newRef(names, refs)); }
+UGTerm PoolTerm::gterm(RenameMap &names, ReferenceMap &refs) const   { return gringo_make_unique<GVarTerm>(_newRef(names, refs)); }
 
 void PoolTerm::collectIds(VarSet &x) const {
     for (auto &y : args) { y->collectIds(x); }
@@ -840,7 +840,7 @@ FWSignature ValTerm::getSig() const {
 
 UTerm ValTerm::renameVars(RenameMap &) const { return UTerm(clone()); }
 
-UGTerm ValTerm::gterm(RenameMap &, ReferenceMap &) const { return make_unique<GValTerm>(value); }
+UGTerm ValTerm::gterm(RenameMap &, ReferenceMap &) const { return gringo_make_unique<GValTerm>(value); }
 
 void ValTerm::collectIds(VarSet &x) const {
     if (value.type() == Value::ID) { x.emplace(value.string()); }
@@ -851,7 +851,7 @@ UTerm ValTerm::replace(Defines &x, bool replace) {
     UTerm retTerm;
     x.apply(value, retVal, retTerm, replace);
     if (retVal.type() != Value::SPECIAL) { value = retVal; }
-    else                                 { return std::move(retTerm); }
+    else                                 { return retTerm; }
     return nullptr;
 }
 
@@ -965,7 +965,7 @@ UTerm VarTerm::renameVars(RenameMap &names) const {
     return make_locatable<VarTerm>(loc(), ret.first->second.first, ret.first->second.second, 0, bindRef);
 }
 
-UGTerm VarTerm::gterm(RenameMap &names, ReferenceMap &refs) const { return make_unique<GVarTerm>(_newRef(names, refs)); }
+UGTerm VarTerm::gterm(RenameMap &names, ReferenceMap &refs) const { return gringo_make_unique<GVarTerm>(_newRef(names, refs)); }
 
 void VarTerm::collectIds(VarSet &) const { }
 
@@ -1082,7 +1082,7 @@ UTerm LinearTerm::renameVars(RenameMap &names) const {
     return make_locatable<LinearTerm>(loc(), UVarTerm(static_cast<VarTerm*>(var->renameVars(names).release())), m, n);
 }
 
-UGTerm LinearTerm::gterm(RenameMap &names, ReferenceMap &refs) const { return make_unique<GLinearTerm>(var->_newRef(names, refs), m, n); }
+UGTerm LinearTerm::gterm(RenameMap &names, ReferenceMap &refs) const { return gringo_make_unique<GLinearTerm>(var->_newRef(names, refs), m, n); }
 
 void LinearTerm::collectIds(VarSet &) const {
 }
@@ -1257,7 +1257,7 @@ UGTerm UnOpTerm::gterm(RenameMap &names, ReferenceMap &refs) const {
             return std::move(fun);
         }
     }
-    return make_unique<GVarTerm>(_newRef(names, refs));
+    return gringo_make_unique<GVarTerm>(_newRef(names, refs));
 }
 
 UGFunTerm UnOpTerm::gfunterm(RenameMap &names, ReferenceMap &refs) const {
@@ -1265,7 +1265,7 @@ UGFunTerm UnOpTerm::gfunterm(RenameMap &names, ReferenceMap &refs) const {
     UGFunTerm fun(arg->gfunterm(names, refs));
     if (!fun) { return nullptr; }
     fun->sign = not fun->sign;
-    return std::move(fun);
+    return fun;
 }
 
 void UnOpTerm::collectIds(VarSet &x) const {
@@ -1430,7 +1430,7 @@ UTerm BinOpTerm::renameVars(RenameMap &names) const {
     return make_locatable<BinOpTerm>(loc(), op, std::move(term), right->renameVars(names));
 }
 
-UGTerm BinOpTerm::gterm(RenameMap &names, ReferenceMap &refs) const  { return make_unique<GVarTerm>(_newRef(names, refs)); }
+UGTerm BinOpTerm::gterm(RenameMap &names, ReferenceMap &refs) const  { return gringo_make_unique<GVarTerm>(_newRef(names, refs)); }
 
 void BinOpTerm::collectIds(VarSet &x) const {
     left->collectIds(x);
@@ -1539,7 +1539,7 @@ UTerm DotsTerm::renameVars(RenameMap &names) const {
     return make_locatable<DotsTerm>(loc(), std::move(term), right->renameVars(names));
 }
 
-UGTerm DotsTerm::gterm(RenameMap &names, ReferenceMap &refs) const   { return make_unique<GVarTerm>(_newRef(names, refs)); }
+UGTerm DotsTerm::gterm(RenameMap &names, ReferenceMap &refs) const   { return gringo_make_unique<GVarTerm>(_newRef(names, refs)); }
 
 void DotsTerm::collectIds(VarSet &x) const {
     left->collectIds(x);
@@ -1661,7 +1661,7 @@ UTerm LuaTerm::renameVars(RenameMap &names) const {
     return make_locatable<LuaTerm>(loc(), name, std::move(args));
 }
 
-UGTerm LuaTerm::gterm(RenameMap &names, ReferenceMap &refs) const    { return make_unique<GVarTerm>(_newRef(names, refs)); }
+UGTerm LuaTerm::gterm(RenameMap &names, ReferenceMap &refs) const    { return gringo_make_unique<GVarTerm>(_newRef(names, refs)); }
 
 void LuaTerm::collectIds(VarSet &x) const {
     for (auto &y : args) { y->collectIds(x); }
@@ -1830,7 +1830,7 @@ UGTerm FunctionTerm::gterm(RenameMap &names, ReferenceMap &refs) const {
 UGFunTerm FunctionTerm::gfunterm(RenameMap &names, ReferenceMap &refs) const {
     UGTermVec args;
     for (auto &x : this->args) { args.emplace_back(x->gterm(names, refs)); }
-    return make_unique<GFunctionTerm>(name, std::move(args));
+    return gringo_make_unique<GFunctionTerm>(name, std::move(args));
 }
 
 void FunctionTerm::collectIds(VarSet &x) const {

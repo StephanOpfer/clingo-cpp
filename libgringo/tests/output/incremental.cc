@@ -66,7 +66,7 @@ std::string iground(std::string in, int last = 3) {
     Scripts scripts(Gringo::Test::getTestModule());
     Input::NongroundProgramBuilder pb(scripts, prg, out, defs);
     Input::NonGroundParser parser(pb);
-    parser.pushStream("-", make_unique<std::stringstream>(in));
+    parser.pushStream("-", gringo_make_unique<std::stringstream>(in));
     Models models;
     parser.parse();
     prg.rewrite(defs);

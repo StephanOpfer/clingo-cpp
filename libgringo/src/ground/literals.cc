@@ -261,7 +261,7 @@ void PredicateLiteral::checkDefined(LocSet &done, SigSet const &edb, UndefVec &u
 }
 
 ExternalBodyOcc::ExternalBodyOcc()               { }
-UGTerm ExternalBodyOcc::getRepr() const          { return make_unique<GValTerm>(Value::createId("#external")); }
+UGTerm ExternalBodyOcc::getRepr() const          { return gringo_make_unique<GValTerm>(Value::createId("#external")); }
 bool ExternalBodyOcc::isPositive() const         { return false; }
 bool ExternalBodyOcc::isNegative() const         { return false; }
 void ExternalBodyOcc::setType(OccurrenceType)    { }
@@ -289,8 +289,8 @@ PredicateLiteral::PredicateLiteral(PredicateDomain &domain, NAF naf, UTerm &&rep
     : repr(std::move(repr))
     , domain(domain) { gLit.naf = naf; }
 
-ProjectionLiteral::ProjectionLiteral(PredicateDomain &domain, UTerm &&repr)
-    : PredicateLiteral(domain, NAF::POS, std::move(repr)) { }
+ProjectionLiteral::ProjectionLiteral(PredicateDomain &domain, UTerm &&repr, bool initialized)
+    : PredicateLiteral(domain, NAF::POS, std::move(repr)), initialized_(initialized) { }
 
 CSPLiteral::CSPLiteral(Relation rel, CSPAddTerm &&left, CSPAddTerm &&right)
     : terms(rel, std::move(left), std::move(right)) { }
@@ -377,21 +377,21 @@ void CSPLiteral::collectImportant(Term::VarSet &vars) {
 // {{{ definition of *Literal::index
 
 UIdx RangeLiteral::index(Scripts &, BinderType, Term::VarSet &bound) {
-    if (assign->bind(bound)) { return make_unique<RangeBinder>(get_clone(assign), range); }
-    else                     { return make_unique<RangeMatcher>(*assign, range); }
+    if (assign->bind(bound)) { return gringo_make_unique<RangeBinder>(get_clone(assign), range); }
+    else                     { return gringo_make_unique<RangeMatcher>(*assign, range); }
 }
 UIdx ScriptLiteral::index(Scripts &scripts, BinderType, Term::VarSet &bound) {
     UTerm clone(assign->clone());
     clone->bind(bound);
-    return make_unique<ScriptBinder>(scripts, std::move(clone), shared);
+    return gringo_make_unique<ScriptBinder>(scripts, std::move(clone), shared);
 }
 UIdx RelationLiteral::index(Scripts &, BinderType, Term::VarSet &bound) {
     if (std::get<0>(shared) == Relation::EQ) {
         UTerm clone(std::get<1>(shared)->clone());
         VarTermVec occBound;
-        if (clone->bind(bound)) { return make_unique<AssignBinder>(std::move(clone), *std::get<2>(shared)); }
+        if (clone->bind(bound)) { return gringo_make_unique<AssignBinder>(std::move(clone), *std::get<2>(shared)); }
     }
-    return make_unique<RelationMatcher>(shared);
+    return gringo_make_unique<RelationMatcher>(shared);
 }
 UIdx PredicateLiteral::index(Scripts &, BinderType type, Term::VarSet &bound) {
     return make_binder(domain, gLit.naf, *repr, gLit.repr, type, isRecursive(), bound, 0);
@@ -399,10 +399,10 @@ UIdx PredicateLiteral::index(Scripts &, BinderType type, Term::VarSet &bound) {
 UIdx ProjectionLiteral::index(Scripts &, BinderType type, Term::VarSet &bound) {
     assert(bound.empty());
     assert(type == BinderType::ALL || type == BinderType::NEW);
-    return make_binder(domain, gLit.naf, *repr, gLit.repr, type, isRecursive(), bound, domain.exports.incOffset);
+    return make_binder(domain, gLit.naf, *repr, gLit.repr, type, isRecursive(), bound, initialized_ ? domain.exports.incOffset : 0);
 }
 UIdx CSPLiteral::index(Scripts &, BinderType, Term::VarSet &) {
-    return make_unique<CSPLiteralMatcher>(terms);
+    return gringo_make_unique<CSPLiteralMatcher>(terms);
 }
 
 // }}}

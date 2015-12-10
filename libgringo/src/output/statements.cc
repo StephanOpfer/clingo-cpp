@@ -129,7 +129,7 @@ void Rule::printLparse(LparseOutputter &out) const {
     out.printBasicRule(headUid, lits);
 }
 Rule *Rule::clone() const {
-    auto ret(make_unique<Rule>());
+    auto ret(gringo_make_unique<Rule>());
     ret->body = get_clone(body);
     ret->head = head;
     return ret.release();
@@ -153,7 +153,7 @@ void RuleRef::printPlain(std::ostream &out) const {
     out << ".\n";
 }
 Rule *RuleRef::clone() const {
-    auto ret(make_unique<Rule>());
+    auto ret(gringo_make_unique<Rule>());
     for (Literal &x : body) { ret->body.emplace_back(ULit(x.clone())); }
     ret->head = head;
     return ret.release();
@@ -266,7 +266,7 @@ void LparseRule::printLparse(LparseOutputter &out) const {
     else                        { out.printDisjunctiveRule(atoms, lits); }
 }
 LparseRule *LparseRule::clone() const {
-    auto ret(make_unique<LparseRule>(get_clone(head), get_clone(auxHead), get_clone(body), choice));
+    auto ret(gringo_make_unique<LparseRule>(get_clone(head), get_clone(auxHead), get_clone(body), choice));
     return ret.release();
 }
 bool LparseRule::isIncomplete() const { return false; }
@@ -315,7 +315,7 @@ void WeightRule::printLparse(LparseOutputter &out) const {
     }
 }
 WeightRule *WeightRule::clone() const {
-    auto ret(make_unique<WeightRule>(head, lower, get_clone(body)));
+    auto ret(gringo_make_unique<WeightRule>(head, lower, get_clone(body)));
     return ret.release();
 }
 bool WeightRule::isIncomplete() const { return false; }
@@ -447,7 +447,7 @@ void HeadAggregateRule::toLparse(LparseTranslator &x) {
         // { heads } :- c, b.
         LRC choice(true);
         for (auto &elem : cond.second) {
-            ULit head = elem.second.head ? make_unique<PredicateLiteral>(NAF::POS, *elem.second.head) : nullptr;
+            ULit head = elem.second.head ? gringo_make_unique<PredicateLiteral>(NAF::POS, *elem.second.head) : nullptr;
             if (head) { choice.addHead(head); }
             // e :- h, c.
             auto bdElem = bdElems.emplace_back(std::piecewise_construct, std::forward_as_tuple(elem.first), std::forward_as_tuple());
@@ -504,7 +504,7 @@ void HeadAggregateRule::printPlain(std::ostream &out) const {
 }
 bool HeadAggregateRule::isIncomplete() const { return true; }
 HeadAggregateRule *HeadAggregateRule::clone() const { 
-    auto ret(make_unique<HeadAggregateRule>());
+    auto ret(gringo_make_unique<HeadAggregateRule>());
     ret->body   = get_clone(body);
     ret->bounds = bounds;
     ret->repr   = repr;
@@ -687,7 +687,7 @@ void DisjunctionRule::printPlain(std::ostream &out) const {
 }
 bool DisjunctionRule::isIncomplete() const { return true; }
 DisjunctionRule *DisjunctionRule::clone() const { 
-    auto ret(make_unique<DisjunctionRule>());
+    auto ret(gringo_make_unique<DisjunctionRule>());
     ret->repr = repr;
     ret->body = get_clone(body);
     return ret.release();

@@ -67,6 +67,7 @@ class TestLparse : public CppUnit::TestFixture {
         CPPUNIT_TEST(test_undefinedDisjunction);
         CPPUNIT_TEST(test_undefinedScript);
         CPPUNIT_TEST(test_nonmon);
+        CPPUNIT_TEST(test_bugRewriteCond);
     CPPUNIT_TEST_SUITE_END();
     using S = std::string;
 
@@ -113,6 +114,7 @@ public:
     void test_undefinedScript();
     void test_minMax();
     void test_nonmon();
+    void test_bugRewriteCond();
     virtual ~TestLparse();
 };
 
@@ -953,6 +955,7 @@ void TestLparse::test_minimize() {
         ;
     CPPUNIT_ASSERT_EQUAL(S("[[a,c,d]]"), IO::to_string(solve(S(prg), {"a", "b", "c", "d"}, {4, 1})));
     CPPUNIT_ASSERT_EQUAL(S("[]"), IO::to_string(solve(S(prg), {"a", "b", "c", "d"}, {4, 0})));
+    CPPUNIT_ASSERT_EQUAL(S("[[]]"), IO::to_string(solve(S("{p}. #maximize{1:not p}."), {"p"}, {0})));
 }
 
 void TestLparse::test_csp() {
@@ -1474,6 +1477,14 @@ void TestLparse::test_nonmon() {
             "var(a,y1,-2).\n"
             "var(a,y2,1).\n"
             "int(4).\n", {"true(e"})));
+}
+
+void TestLparse::test_bugRewriteCond() {
+    CPPUNIT_ASSERT_EQUAL(
+        S("[[p(1)],[p(1),p(2)],[p(2)]]"),
+        IO::to_string(solve(
+            "{p(1..2)}.\n"
+            ":- #false:p(X).\n", {"p("})));
 }
 
 TestLparse::~TestLparse() { }

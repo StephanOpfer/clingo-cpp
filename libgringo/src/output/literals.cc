@@ -39,7 +39,11 @@ std::ostream &operator<<(std::ostream &out, AuxAtom const &x) {
     return out;
 }
 
-ULit AuxLiteral::negateLit(LparseTranslator &) const { return make_unique<AuxLiteral>(atom, inv(naf)); }
+ULit AuxLiteral::negateLit(LparseTranslator &x) const { 
+    ULit lit(gringo_make_unique<AuxLiteral>(atom, inv(naf)));
+    Term::replace(lit, lit->toLparse(x));
+    return lit;
+}
 
 AuxLiteral::AuxLiteral(SAuxAtom atom, NAF naf) : atom(atom), naf(naf) { }
 
@@ -114,14 +118,16 @@ PredicateLiteral *PredicateLiteral::clone() const   { return new PredicateLitera
 ULit PredicateLiteral::toLparse(LparseTranslator &trans) { 
     if (naf == NAF::NOTNOT) {
         ULit aux = trans.makeAux();
-        LRC().addHead(aux).addBody(make_unique<PredicateLiteral>(NAF::NOT, *repr)).toLparse(trans);
+        LRC().addHead(aux).addBody(gringo_make_unique<PredicateLiteral>(NAF::NOT, *repr)).toLparse(trans);
         return aux->negateLit(trans);
     }
     return nullptr;
 
 }
-ULit PredicateLiteral::negateLit(LparseTranslator &) const {
-    return make_unique<PredicateLiteral>(inv(naf), *repr);
+ULit PredicateLiteral::negateLit(LparseTranslator &x) const {
+    ULit lit(gringo_make_unique<PredicateLiteral>(inv(naf), *repr));
+    Term::replace(lit, lit->toLparse(x));
+    return lit;
 }
 int PredicateLiteral::lparseUid(LparseOutputter &out) const {
     if (!repr->second.hasUid()) { repr->second.uid(out.newUid()); }
@@ -524,7 +530,7 @@ ULit Conjunction::toLparse(LparseTranslator &x) {
     if (!repr->second.bdLit) {
         LparseRuleCreator bd;
         for (ConjunctionState::Elem &y : repr->second.elems) {
-            if (y.heads.size() == 1 && y.heads.front().empty()) {
+            if ((y.heads.size() == 1 && y.heads.front().empty()) || y.bodies.empty()) {
                 // this part of the conditional literal is a fact
                 continue;
             }
@@ -547,17 +553,16 @@ ULit Conjunction::toLparse(LparseTranslator &x) {
                     LRC().addHead(auxHead).addBody(get_clone(head)).toLparse(x);
                     LRC().addHead(aux).addBody(auxHead).toLparse(x);
                 }
+                // chk <=> body.
+                std::vector<ULitVec> bodies;
                 for (auto &body : y.bodies) {
-                    if (!body.empty()) {
-                        // chk <=> body.
-                        ULit chk = getEqualClause(x, body, true, repr->second.incomplete && !y.heads.empty());
-                        // aux :- ~chk.
-                        LRC().addHead(aux).addBody(chk->negateLit(x)).toLparse(x);
-                        if (repr->second.incomplete && !y.heads.empty()) {
-                            // aux | chk | ~x.first.
-                            LRC().addHead(aux).addHead(chk).addHead(auxHead->negateLit(x)).toLparse(x);
-                        }
-                    }
+                    bodies.emplace_back(get_clone(body));
+                }
+                ULit chk = getEqualFormula(x, std::move(bodies), false, repr->second.incomplete && !y.heads.empty());
+                LRC().addHead(aux).addBody(chk->negateLit(x)).toLparse(x);
+                if (repr->second.incomplete && !y.heads.empty()) {
+                    // aux | chk | ~x.first.
+                    LRC().addHead(aux).addHead(chk).addHead(auxHead->negateLit(x)).toLparse(x);
                 }
                 // body += aux
                 bd.addBody(aux);
@@ -656,7 +661,7 @@ ULit DisjointLiteral::toLparse(LparseTranslator &x) {
         }
     }
     x.addDisjointConstraint(aux, std::move(cons));
-    ULit auxLit = make_unique<AuxLiteral>(aux, NAF::NOT);
+    ULit auxLit = gringo_make_unique<AuxLiteral>(aux, NAF::NOT);
     if (naf != NAF::NOT) {
         auxLit = auxLit->negateLit(x);
     }
@@ -761,17 +766,17 @@ ULit CSPLiteral::toLparse(LparseTranslator &x) {
         case Relation::NEQ: {
             x.addLinearConstraint(aux, CoefVarVec(std::get<1>(ground)), bound-1);
             addInv(aux, std::move(std::get<1>(ground)), bound + 1);
-            return make_unique<AuxLiteral>(aux, rel != Relation::NEQ ? NAF::NOT : NAF::POS);
+            return gringo_make_unique<AuxLiteral>(aux, rel != Relation::NEQ ? NAF::NOT : NAF::POS);
         }
         case Relation::LT:  { bound--; }
         case Relation::LEQ: {
             x.addLinearConstraint(aux, CoefVarVec(std::get<1>(ground)), bound);
-            return make_unique<AuxLiteral>(aux, NAF::POS);
+            return gringo_make_unique<AuxLiteral>(aux, NAF::POS);
         }
         case Relation::GT:  { bound++; }
         case Relation::GEQ: {
             addInv(aux, std::move(std::get<1>(ground)), bound);
-            return make_unique<AuxLiteral>(aux, NAF::POS);
+            return gringo_make_unique<AuxLiteral>(aux, NAF::POS);
         }
     }
     assert(false);

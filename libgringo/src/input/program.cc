@@ -94,7 +94,7 @@ void Program::rewrite(Defines &defs) {
             defs.apply(fact, rv, rt, false);
             if (rt) {
                 Location loc{rt->loc()};
-                block.addedStms.emplace_back(make_locatable<Statement>(loc, make_unique<SimpleHeadLiteral>(make_locatable<PredicateLiteral>(loc, NAF::POS, std::move(rt))), UBodyAggrVec{}, StatementType::RULE));
+                block.addedStms.emplace_back(make_locatable<Statement>(loc, gringo_make_unique<SimpleHeadLiteral>(make_locatable<PredicateLiteral>(loc, NAF::POS, std::move(rt))), UBodyAggrVec{}, StatementType::RULE));
                 return Value();
             }
             else if (rv.type() != Value::SPECIAL) { return rv; }
@@ -140,10 +140,10 @@ void Program::rewrite(Defines &defs) {
         if (!x.done) {
             Location loc(x.project->loc());
             UBodyAggrVec body;
-            body.emplace_back(make_unique<SimpleBodyLiteral>(make_locatable<ProjectionLiteral>(loc, get_clone(x.project))));
+            body.emplace_back(gringo_make_unique<SimpleBodyLiteral>(make_locatable<ProjectionLiteral>(loc, get_clone(x.project))));
             stms_.emplace_back(make_locatable<Statement>(
                 loc,
-                make_unique<SimpleHeadLiteral>(make_locatable<PredicateLiteral>(loc, NAF::POS, get_clone(x.projected))),
+                gringo_make_unique<SimpleHeadLiteral>(make_locatable<PredicateLiteral>(loc, NAF::POS, get_clone(x.projected))),
                 std::move(body), StatementType::RULE));
             x.done = true;
         }
