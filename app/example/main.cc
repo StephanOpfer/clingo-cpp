@@ -210,8 +210,13 @@ void example2()
 	lib.add("base", {}, "a(b(c(3,4))). a(b(c(3,3))). a(b(c(2,3))). a(b(c(2,3),2)). a(b(c(Y,X))) :- a(1), b(Y), c(X).");
 	lib.ground( { {"base", {}}}, nullptr);
 
+	// Note that you need to adapt the method "checkMatchValues" with
+	// the corresponding wildcard-identifier for the following two options.
+
+	// 1st Option with '?' as wildcard (needs parse method from above)
 	//Gringo::Value queryGringoValue = stringToValue("a(b(c(?,3)))");
 
+	// 2nd Option with gringo-module parser (no need for extra method, but give "wildcard" a special meaning)
 	Gringo::Value queryGringoValue = module.parseValue("a(b(c(wildcard,3)))");
 
 	lib.solve([queryGringoValue](Gringo::Model const &m)
