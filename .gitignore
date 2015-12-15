@@ -29,3 +29,4 @@
 
 # clingos build folder
 build
+/Debug/

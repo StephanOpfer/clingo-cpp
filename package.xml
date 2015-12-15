@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>clingo-cpp</name>
+  <name>clingo_cpp</name>
   <version>0.0.0</version>
   <description>The clingo-cpp package</description>
 
@@ -25,7 +25,9 @@
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
   <!-- Authors do not have to be maintianers, but could be -->
   <!-- Example: -->
-  <!-- <author email="jane.doe@example.com">Jane Doe</author> -->
+  <author>Thorsten Schaub</author>
+  <author>Roland Kaminski</author>
+  <author>Benjamin Kaufmann</author>
 
 
   <!-- The *_depend tags are used to specify dependencies -->
