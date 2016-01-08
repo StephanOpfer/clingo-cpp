@@ -1,13 +1,19 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(clingo_cpp)
 
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED cmake_modules)
+# this is necessary for python and lua script support of libclingo
+find_package(Lua51 REQUIRED)
+find_package(PythonLibs REQUIRED)
+find_package(TBB REQUIRED)
+include(cmake/tbb_extras.cmake)
 
 catkin_package(
-   INCLUDE_DIRS libgringo libgringo/src libprogram_opts libclasp libclingo
-   LIBRARIES clingo_shared program_opts_shared clasp_shared gringo_shared
+   INCLUDE_DIRS libgringo libgringo/src libprogram_opts libclasp libclingo ${LUA_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
+   LIBRARIES clingo_shared program_opts_shared clasp_shared gringo_shared ${LUA_LIBRARIES} ${PYTHON_LIBRARIES} ${TBB_LIBRARIES}
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
+    CFG_EXTRAS tbb_extras.cmake
 )
 
 add_custom_command(
@@ -32,7 +38,7 @@ add_custom_command(
             ${CMAKE_CURRENT_SOURCE_DIR}/build/release/libclasp_shared.a
             ${CMAKE_CURRENT_SOURCE_DIR}/build/release/libgringo_shared.a
             ${CMAKE_CURRENT_SOURCE_DIR}/build/release/libprogram_opts_shared.a
-    COMMENT "${PROJECT_NAME}: Copying static libraries libclingo.a, libclasp.a, libgringo.a, and libprogram_opts.a into devel/lib folder."
+    COMMENT "${PROJECT_NAME}: Copying static libraries libclingo_shared.a, libclasp_shared.a, libgringo_shared.a, and libprogram_opts_shared.a into ${CATKIN_DEVEL_PREFIX}/lib folder."
 )
 
 add_custom_target(${PROJECT_NAME} ALL 
@@ -40,7 +46,7 @@ add_custom_target(${PROJECT_NAME} ALL
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "${PROJECT_NAME}: Compiling and copying libraries."
     SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/build/release/libclingo_shared.a
-	    ${CMAKE_CURRENT_SOURCE_DIR}/build/release/libclasp_shared.a
+	        ${CMAKE_CURRENT_SOURCE_DIR}/build/release/libclasp_shared.a
             ${CMAKE_CURRENT_SOURCE_DIR}/build/release/libgringo_shared.a
             ${CMAKE_CURRENT_SOURCE_DIR}/build/release/libprogram_opts_shared.a
 )
