@@ -259,8 +259,9 @@ void example1()
 	std::vector<char const *> args {"clingo", "-e", "brave", nullptr};
 	DefaultGringoModule module;
 	ClingoLib lib(module, args.size() - 2, args.data());
-	lib.add("base", {}, "a :- not b. b :- not a.");
-	lib.ground( { {"base", {}}}, nullptr);
+	lib.load("/home/emmeda/Research/dev/mslws/src/symrock/alica_asp_test/src/etc/asp_background_knowledge/alica-background-knowledge.lp");
+	lib.ground( { {"alicaBackground", {}}}, nullptr);
+	lib.ground( { {"testTopLevel", {}}}, nullptr);
 	lib.solve([](Gringo::Model const &m)
 	{
 		for (auto &atom : m.atoms(Gringo::Model::SHOWN))
@@ -275,6 +276,6 @@ void example1()
 
 int main()
 {
-	example2();
+	example1();
 }
 
