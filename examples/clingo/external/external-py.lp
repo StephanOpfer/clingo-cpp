@@ -5,10 +5,12 @@ def main(prg):
     prg.assign_external(Fun("p", [3]), True)
     prg.solve()
     prg.assign_external(Fun("p", [3]), False)
-    prg.solve()
+    print prg.solve()
     prg.ground([("succ", [1]), ("succ", [2])])
+    prg.assign_external(Fun("p", [4]), True)
     prg.solve()
-    prg.ground([("succ", [3])])
-    prg.solve()
+    
+    #prg.ground([("succ", [3])])
+    #prg.solve()
 #end.
 
