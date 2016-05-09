@@ -10,7 +10,7 @@ include(cmake/tbb_extras.cmake)
 
 catkin_package(
    INCLUDE_DIRS libgringo libgringo/src libprogram_opts libclasp libclingo ${LUA_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
-   LIBRARIES  ${LUA_LIBRARIES} ${PYTHON_LIBRARIES} ${TBB_LIBRARIES} #clingo_shared program_opts_shared clasp_shared gringo_shared
+   LIBRARIES  ${LUA_LIBRARIES} ${PYTHON_LIBRARIES} ${TBB_LIBRARIES} clingo_shared program_opts_shared clasp_shared gringo_shared #TODO without these tests aren building
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
     CFG_EXTRAS tbb_extras.cmake
@@ -41,28 +41,28 @@ add_custom_command(
     COMMENT "${PROJECT_NAME}: Copying static libraries libclingo_shared.a, libclasp_shared.a, libgringo_shared.a, and libprogram_opts_shared.a into ${CATKIN_DEVEL_PREFIX}/lib folder."
 )
 
-add_custom_target(clingo_shared ALL 
+add_custom_target(clingo_shared_target ALL 
     DEPENDS ${CATKIN_DEVEL_PREFIX}/lib/libclingo.a
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "${PROJECT_NAME}: Compiling and copying libraries."
     SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/build/release/libclingo_shared.a
 )
 
-add_custom_target(program_opts_shared ALL 
+add_custom_target(program_opts_shared_target ALL 
     DEPENDS ${CATKIN_DEVEL_PREFIX}/lib/libclingo.a
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "${PROJECT_NAME}: Compiling and copying libraries."
     SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/build/release/libprogram_opts_shared.a
 )
 
-add_custom_target(clasp_shared ALL 
+add_custom_target(clasp_shared_target ALL 
     DEPENDS ${CATKIN_DEVEL_PREFIX}/lib/libclingo.a
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "${PROJECT_NAME}: Compiling and copying libraries."
     SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/build/release/libclasp_shared.a
 )
 
-add_custom_target(gringo_shared ALL 
+add_custom_target(gringo_shared_target ALL 
     DEPENDS ${CATKIN_DEVEL_PREFIX}/lib/libclingo.a
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "${PROJECT_NAME}: Compiling and copying libraries."
