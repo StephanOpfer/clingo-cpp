@@ -30,3 +30,5 @@
 # clingos build folder
 build
 /Debug/
+.sconf_temp/
+.sconsign.dblite
